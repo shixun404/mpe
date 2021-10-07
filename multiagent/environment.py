@@ -28,9 +28,10 @@ class MultiAgentEnv(gym.Env):
         # environment parameters
         self.discrete_action_space = True
         # if true, action is a number 0...N, otherwise action is a one-hot N-dimensional vector
-        self.discrete_action_input = True
+        self.discrete_action_input = False
         # if true, even the action is continuous, action will be performed discretely
         self.force_discrete_action = world.discrete_action if hasattr(world, 'discrete_action') else False
+        
         # if true, every agent has the same reward
         self.shared_reward = world.collaborative if hasattr(world, 'collaborative') else False
         self.time = 0
@@ -161,7 +162,7 @@ class MultiAgentEnv(gym.Env):
             action = act
         else:
             action = [action]
-
+        
         if agent.movable:
             # physical action
             if self.discrete_action_input:
@@ -177,6 +178,7 @@ class MultiAgentEnv(gym.Env):
                     action[0][:] = 0.0
                     action[0][d] = 1.0
                 if self.discrete_action_space:
+                    
                     agent.action.u[0] += action[0][1] - action[0][2]
                     agent.action.u[1] += action[0][3] - action[0][4]
                 else:
@@ -251,6 +253,7 @@ class MultiAgentEnv(gym.Env):
                     viewer.add_geom(geom)
 
         results = []
+        print(self.viewers)
         for i in range(len(self.viewers)):
             from multiagent import rendering
             # update bounds to center around agent
@@ -262,6 +265,7 @@ class MultiAgentEnv(gym.Env):
             self.viewers[i].set_bounds(pos[0]-cam_range,pos[0]+cam_range,pos[1]-cam_range,pos[1]+cam_range)
             # update geometry positions
             for e, entity in enumerate(self.world.entities):
+                print(e, entity, entity.state.p_pos)
                 self.render_geoms_xform[e].set_translation(*entity.state.p_pos)
             # render to display or array
             results.append(self.viewers[i].render(return_rgb_array = mode=='rgb_array'))
